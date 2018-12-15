@@ -1,0 +1,11 @@
+window.c = Math.abs;
+window.a = Math.LN2;
+window.r = Math.log;
+window.D = Math.floor;
+window.b = Math.pow;
+window.o = Math.round;
+// window._ = Math.PI;
+window.S = Math.max;
+window.d = Math.ceil;
+window.g = Math.min;
+window.s = String.fromCharCode; 

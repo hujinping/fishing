@@ -1,0 +1,31 @@
+{
+  "ver": "2.2.0",
+  "uuid": "f9ffd993-f45e-4239-a8fa-b002e92cbf2d",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "subMetas": {
+    "handBookBtn": {
+      "ver": "1.0.3",
+      "uuid": "f841afaa-3733-48c9-b544-30e77e825a9c",
+      "rawTextureUuid": "f9ffd993-f45e-4239-a8fa-b002e92cbf2d",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 114,
+      "height": 155,
+      "rawWidth": 114,
+      "rawHeight": 155,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
