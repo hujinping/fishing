@@ -89,7 +89,6 @@ mg.loginSDK = {
                 data: {
                     flg: "xsdby",
                 },
-
                 method: 'GET',
                 success: (resp) => {
                     console.log("log-----------getSwitch---resp=:", resp);
