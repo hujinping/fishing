@@ -40,8 +40,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 0,
-      "height": 0
+      "width": 285,
+      "height": 380
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -284,8 +284,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 146,
-      "height": 36
+      "width": 138,
+      "height": 34
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -332,8 +332,8 @@
     "_useOriginalSize": false,
     "_string": "煎饼大师",
     "_N$string": "煎饼大师",
-    "_fontSize": 36,
-    "_lineHeight": 36,
+    "_fontSize": 34,
+    "_lineHeight": 34,
     "_enableWrapText": true,
     "_N$file": null,
     "_isSystemFontUsed": true,
@@ -621,26 +621,6 @@
     "adName": {
       "__id__": 7
     },
-    "desSpriteFrames": [
-      {
-        "__uuid__": "18851552-ec45-4fcd-a7c9-746c10a660e0"
-      },
-      {
-        "__uuid__": "d8fd1235-dad9-4a76-b59a-1c5b0a64adf6"
-      },
-      {
-        "__uuid__": "4e20ef4d-33fe-41eb-8dc1-65c5962d3fd7"
-      },
-      {
-        "__uuid__": "9832ec31-c61e-4463-ba1b-21442fe71923"
-      },
-      {
-        "__uuid__": "129fca7c-5bd8-46a4-bdca-72b0bd1a06f7"
-      },
-      {
-        "__uuid__": "b54fc5dc-3cf0-4e81-aa52-7ed671613f23"
-      }
-    ],
     "_id": ""
   },
   {

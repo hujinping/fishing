@@ -26,7 +26,27 @@ cc.Class({
         goldPrefab: cc.Prefab,
         playMoneyAni: cc.Node,
         moneyPrefab: cc.Prefab,
-        jumpToOtherGameBtn: cc.Node
+        likeAd: cc.Prefab,
+        hotAd: cc.Prefab,
+        deadAd: cc.Prefab,
+        jumpToOtherGameBtn: cc.Node,
+        likeAdNodeArr: [],
+        deadAdNodeArr: [],
+        hotAd0NodeArr: [],
+        hotAd1NodeArr: [],
+
+        likeAdDataArr: [],
+        deadAdDataArr: [],
+        hotAd0DataArr: [],
+        hotAd1DataArr: [],
+
+        deadAdPosArr: [],
+        likeAdLocation: null,
+        deadAdLocation: null,
+        hotAd0Location: null,
+        hotAd1Location: null,
+        carouselHotAd0Index: 0,
+        carouselHotAd1Index: 1,
     },
     initGameStartData: function() {
         fishMaster.homeMain = this, fishMaster.collectNumber = 0, fishMaster.disNum = 0,
@@ -38,6 +58,14 @@ cc.Class({
             fishMaster.openFishArr = [], fishMaster.buff = 1;
     },
     onLoad: function() {
+        mg.homeMain = this;
+        this.deadAdPosArr.push({ x: -305, y: 543 });
+        this.deadAdPosArr.push({ x: 0, y: 543 });
+        this.deadAdPosArr.push({ x: 305, y: 543 });
+        this.deadAdPosArr.push({ x: -305, y: 138 });
+        this.deadAdPosArr.push({ x: 0, y: 138 });
+        this.deadAdPosArr.push({ x: 305, y: 138 });
+
         this.initGameStartData(), mg.AudioHelper.init(), this._updateSoundState(), this.gameOnShow(),
             this.showHomeViewAction();
         mg.mta.Bilog(fishMaster.Bi_EventID.comeInGame);
@@ -61,22 +89,38 @@ cc.Class({
         mg.btnShare = this.node.getChildByName("homeNode").getChildByName("commonNode").getChildByName("shareBtn");
         mg.btnTask = this.node.getChildByName("homeNode").getChildByName("commonNode").getChildByName("dailyTasksBtn");
         mg.redPackageNode = this.node.getChildByName("homeNode").getChildByName("hongbaoNode");
+        mg.likeAdsNode = this.node.getChildByName("homeNode").getChildByName("likeAdsNode");
+        mg.hotAd0Node = this.node.getChildByName("homeNode").getChildByName("hotAd0");
+        mg.hotAd1Node = this.node.getChildByName("homeNode").getChildByName("hotAd1");
+        mg.deadAdsNode = this.node.getChildByName("collectNode").getChildByName("adNode");
 
         mg.btnShare.active = false;
         mg.btnTask.active = false;
         mg.redPackageNode.active = false;
+        mg.likeAdsNode.active = false;
+        mg.hotAd0Node.active = false;
+        mg.hotAd1Node.active = false;
+        mg.deadAdsNode.active = false;
 
         if (mg.switch != null) {
             mg.btnShare.active = mg.switch;
             mg.btnTask.active = mg.switch;
             mg.redPackageNode.active = mg.switch;
+            mg.likeAdsNode.active = mg.switch;
+            mg.hotAd0Node.active = mg.switch;
+            mg.hotAd1Node.active = mg.switch;
+            mg.deadAdsNode.active = mg.switch;
         }
 
     },
     start: function() {
         this.showGuide(1), fishMaster.fishManage.createFish(), mg.EventDispatcher.trigger(fishMaster.EVENT_GAME.CHANGE_GAME_STATE, fishMaster.GameDefine.GAME_STATE.DEFAULT);
-
-
+        if (mg.gameAds && mg.notShowAd) {
+            this.showLikeAds();
+            this.showDeadAD();
+            this.showHotAd0();
+            this.showHotAd1();
+        }
     },
     onDestroy: function() {
         this.destroyBanner(), this.homeNode.off(cc.Node.EventType.TOUCH_START, this.startGame, this),
@@ -101,7 +145,8 @@ cc.Class({
     },
     startGame: function() {
         if (this.canClick) {
-            this.initBannerAdNode(), this.homeNode.active = !1, this.collectNode.active = !1,
+            this.initBannerAdNode(),
+                this.homeNode.active = !1, this.collectNode.active = !1,
                 this.offlineNode.active = !1, fishMaster.addRedPacketMoneyCount = 0, fishMaster.openFishArr = [],
                 mg.EventDispatcher.trigger(fishMaster.EVENT_GAME.CHANGE_GAME_STATE, fishMaster.GameDefine.GAME_STATE.START),
                 mg.AudioHelper.playLocalMusic(fishMaster.GameDefine.Sound.GAMEBGM, !0, .75);
@@ -266,8 +311,8 @@ cc.Class({
             this.collectNode.active || (this.getFishFun(), fishMaster.camera.showSize(!1), mg.AudioHelper.playLocalEffect(fishMaster.GameDefine.Sound.ENDGAME, !1),
                 this.collectNode.getChildByName("buff").getComponent(cc.Label).string = 1 < fishMaster.buff ? "金钱+" + 100 * fishMaster.buff + "%" : "",
                 this.collectGoldNum = d(this.collectGoldNum * fishMaster.buff), this.collectNode.getChildByName("getGoldText").getComponent(cc.Label).string = "$" + this.collectGoldNum.toString(),
-                this.collectNode.getChildByName("collectDoubleBtn").getChildByName("gold").getComponent(cc.Label).string = "$" + (2 * this.collectGoldNum).toString(),
-                this.collectNode.getChildByName("collectThreeBtn").getChildByName("gold").getComponent(cc.Label).string = "$" + (3 * this.collectGoldNum).toString(),
+                this.collectNode.getChildByName("collectDoubleBtn").getChildByName("gold").getComponent(cc.Label).string = "$" + (5 * this.collectGoldNum).toString(),
+                this.collectNode.getChildByName("collectThreeBtn").getChildByName("gold").getComponent(cc.Label).string = "$" + (10 * this.collectGoldNum).toString(),
                 this.collectNode.active = !0, fishMaster.collectNumber += 1, 0 == fishMaster.collectNumber % 5 ? (this.collectNode.getChildByName("collectDoubleBtn").active = !1,
                     this.collectNode.getChildByName("collectThreeBtn").active = !0) : (this.collectNode.getChildByName("collectDoubleBtn").active = !0,
                     this.collectNode.getChildByName("collectThreeBtn").active = !1), 1 == mg.isShareOpenData.collectDoubleShare && "true" == fishMaster.gameData.getCanWatchVideo() ? (this.collectNode.getChildByName("collectDoubleBtn").getComponent(cc.Sprite).spriteFrame = this.collectBtnSprites[1],
@@ -275,7 +320,8 @@ cc.Class({
                     this.collectNode.getChildByName("collectThreeBtn").getComponent(cc.Sprite).spriteFrame = this.collectBtnSprites[2]),
                 fishMaster.gameData.addRedPacketHookCount(), fishMaster.redPacket.freshData(), setTimeout(function() {
                     fishMaster.fishManage.createFish();
-                }, 50), this.showBanner());
+                }, 50) //, this.showBanner()
+            );
     },
     runChangeEndScore: function() {
         var a = parseInt(this.collectNode.getChildByName("getGoldText").getComponent(cc.Label).string.replace(/[\;|\:]/g, "")),
@@ -349,7 +395,7 @@ cc.Class({
         if (1 == mg.isShareOpenData.collectDoubleShare && "true" == fishMaster.gameData.getCanWatchVideo()) {
             var t = this;
             mg.AD.createRewardedVideoAd(fishMaster.AD_ID.CollectTimesId, function() {
-                t.collectDoubel(2);
+                t.collectDoubel(5);
             }, function() {
                 wx.showToast({
                     title: "领取失败"
@@ -362,7 +408,7 @@ cc.Class({
         if (1 == mg.isShareOpenData.collectThreeShare && "true" == fishMaster.gameData.getCanWatchVideo()) {
             var t = this;
             mg.AD.createRewardedVideoAd(fishMaster.AD_ID.CollectThreeId, function() {
-                t.collectDoubel(3);
+                t.collectDoubel(10);
             }, function() {
                 wx.showToast({
                     title: "领取失败"
@@ -396,7 +442,7 @@ cc.Class({
         mg.AudioHelper.playLocalEffect(fishMaster.GameDefine.Sound.BTN, !1);
     },
     offlineCollectDoubel: function() {
-        fishMaster.gameData.addGameMoney(2 * this.offlineGoldNum), this.offlineNode.active = !1,
+        fishMaster.gameData.addGameMoney(5 * this.offlineGoldNum), this.offlineNode.active = !1,
             this.freshGoldLabel();
     },
     offlineCollectCloseBtn: function() {
@@ -525,5 +571,295 @@ cc.Class({
                     this.offlineNode.active = !0, this.showBanner();
             } else this.freshGoldLabel();
         }
+    },
+
+
+    /*************************************猜你喜欢广告模块*************************************/
+    showLikeAds() {
+        this.unscheduleAllCallbacks();
+        var mask = mg.likeAdsNode.getChildByName("mask");
+        if (!(mg.gameAds && mg.gameAds.length > 0)) { return }
+        for (let i = 0; i < mg.gameAds.length; i++) {
+            if (mg.gameAds[i].location_flg == "C") {
+                this.likeAdLocation = mg.gameAds[i].location_id;
+                mg.loginSDK.getAdDes(mg.gameAds[i].url, (data) => {
+                    console.log("log----------------猜你喜欢------", data.data.result);
+                    this.likeAdDataArr = data.data.result;
+                    console.log("log----------------猜你喜欢111------", this.likeAdDataArr);
+                    mask.removeAllChildren();
+                    for (var i = 0; i < this.likeAdDataArr.length; i++) {
+                        var ad = cc.instantiate(this.likeAd);
+                        ad.parent = mask;
+                        ad.x = -375 + 250 * i;
+                        let adSprite = ad.getChildByName("adSprite");
+                        let spComponent = adSprite.getComponent(cc.Sprite)
+                        mg.loginSDK.loadImg(spComponent, this.likeAdDataArr[i].ad_img);
+
+                        let adData = { ad_id: this.likeAdDataArr[i].ad_id, appid: this.likeAdDataArr[i].ad_appid, path: this.likeAdDataArr[i].ad_path, ad_qrimg: this.likeAdDataArr[i].ad_qrimg };
+                        ad.on(cc.Node.EventType.TOUCH_START, (e) => {
+                            mg.loginSDK.reportClickInfo(adData.ad_id, this.likeAdLocation);
+                            this.refreshLikeAd(adData.appid);
+                            mg.loginSDK.gotoOther(adData);
+                        });
+                        this.likeAdNodeArr.push(ad);
+                    }
+                });
+
+                this.scheduleOnce(this.doAciton.bind(this), 2);
+                this.scheduleOnce(this.doCarousel.bind(this), 10);
+            }
+        }
+    },
+
+    refreshLikeAd(appid) {
+        var mask = mg.likeAdsNode.getChildByName("mask");
+
+        if (this.likeAdDataArr.length <= 4) {
+            return;
+        }
+        this.unscheduleAllCallbacks();
+        mask.removeAllChildren();
+        this.likeAdNodeArr.splice(0, this.likeAdNodeArr.length)
+        for (let i = 0; i < this.likeAdDataArr.length; i++) {
+            if (appid == this.likeAdDataArr[i].ad_appid) {
+                this.likeAdDataArr.splice(i, 1);
+            }
+        }
+        for (let i = 0; i < this.likeAdDataArr.length; i++) {
+            var ad = cc.instantiate(this.likeAd);
+            ad.parent = mask;
+            ad.x = -375 + 250 * i;
+            let adSprite = ad.getChildByName("adSprite");
+            let spComponent = adSprite.getComponent(cc.Sprite);
+            mg.loginSDK.loadImg(spComponent, this.likeAdDataArr[i].ad_img);
+
+            let adData = { ad_id: this.likeAdDataArr[i].ad_id, appid: this.likeAdDataArr[i].ad_appid, path: this.likeAdDataArr[i].ad_path, ad_qrimg: this.likeAdDataArr[i].ad_qrimg }
+            ad.on(cc.Node.EventType.TOUCH_START, () => {
+                mg.loginSDK.reportClickInfo(adData.ad_id, this.likeAdLocation);
+                this.refreshLikeAd(adData.appid);
+                mg.loginSDK.gotoOther(adData);
+            });
+            this.likeAdNodeArr.push(ad);
+        }
+
+        this.scheduleOnce(this.doAciton.bind(this), 2);
+        this.scheduleOnce(this.doCarousel.bind(this), 10);
+    },
+
+
+    doAciton() {
+        let currentAdList = [];
+        for (let i = 0; i < this.likeAdNodeArr.length; i++) {
+            if (this.likeAdNodeArr[i].x < 400 && this.likeAdNodeArr[i].x > -400) {
+                currentAdList.push(this.likeAdNodeArr[i]);
+            }
+        }
+
+        let randAdIndex = Math.floor(Math.random() * currentAdList.length);
+        let time = Math.random() * currentAdList.length + 3;
+        currentAdList[randAdIndex].runAction(cc.repeat(cc.sequence(
+            cc.scaleTo(0.2, 0.9),
+            cc.scaleTo(0.2, 1.0),
+        ), 2))
+        this.scheduleOnce(this.doAciton.bind(this), time);
+    },
+
+    doCarousel() {
+        if (this.likeAdNodeArr.length <= 4) { //广告位推荐位大于3个，才有轮播功能
+            return
+        }
+        //整体左移一个广告位
+        for (let i = 0; i < this.likeAdNodeArr.length - 1; i++) {
+            this.likeAdNodeArr[i].stopAllActions();
+            this.likeAdNodeArr[i].scale = 1.0;
+            this.likeAdNodeArr[i].runAction(cc.moveBy(0.5, cc.p(-250 * 1, 0)))
+        }
+        //将超出左边边界的移动到右边
+        this.likeAdNodeArr[this.likeAdNodeArr.length - 1].runAction(cc.sequence(
+            cc.moveBy(0.5, cc.p(-250 * 1, 0)),
+            cc.callFunc(() => {
+                let first = this.likeAdNodeArr.shift();
+                this.likeAdNodeArr.push(first);
+                this.likeAdNodeArr[this.likeAdNodeArr.length - 1].x = this.likeAdNodeArr[this.likeAdNodeArr.length - 2].x + 250;
+                this.scheduleOnce(this.doCarousel.bind(this), 10)
+            })
+        ))
+    },
+
+    /********************************爆款广告1************************************/
+    showHotAd0() {
+        var adContent = mg.hotAd0Node.getChildByName("adContent");
+        for (var i = 0; i < mg.gameAds.length; i++) {
+            if (mg.gameAds[i].location_flg == "B") {
+                this.hotAd0Location = mg.gameAds[i].location_id;
+                mg.loginSDK.getAdDes(mg.gameAds[i].url, (data) => {
+                    this.hotAd0DataArr = data.data.result;
+                    console.log("log----------------爆款游戏0------", this.hotAd0DataArr);
+                    adContent.removeAllChildren();
+                    for (var i = 0; i < this.hotAd0DataArr.length; i++) {
+                        var ad = cc.instantiate(this.hotAd);
+                        ad.parent = adContent;
+                        ad.x = i == 0 ? 0 : -3000;
+                        let adSprite = ad.getChildByName("adSprite");
+                        let spComponent = adSprite.getComponent(cc.Sprite);
+                        mg.loginSDK.loadImg(spComponent, this.hotAd0DataArr[i].ad_img);
+                        let adData = { ad_id: this.hotAd0DataArr[i].ad_id, appid: this.hotAd0DataArr[i].ad_appid, path: this.hotAd0DataArr[i].ad_path, ad_qrimg: this.hotAd0DataArr[i].ad_qrimg }
+                        ad.on(cc.Node.EventType.TOUCH_START, () => {
+                            mg.loginSDK.reportClickInfo(adData.ad_id, this.hotAd0Location);
+                            mg.loginSDK.gotoOther(adData);
+                        });
+                        this.hotAd0NodeArr.push(ad);
+                    }
+                    mg.hotAd0Node.stopAllActions();
+                    mg.hotAd0Node.runAction(cc.repeatForever(
+                        cc.sequence(
+                            cc.delayTime(7),
+                            cc.callFunc(() => {
+                                this.doCarouselHotAd0();
+                            })
+                        )
+                    ))
+                });
+            }
+        }
+    },
+
+    doCarouselHotAd0() {
+        if (this.hotAd0NodeArr.length <= 1) { //广告位推荐位大于1个，才有轮播功能
+            return
+        }
+        this.hotAd0NodeArr[this.carouselHotAd0Index].x = 0;
+        for (let i = 0; i < this.hotAd0NodeArr.length; i++) {
+            if (i == this.carouselHotAd0Index) {
+                continue;
+            }
+            this.hotAd0NodeArr[i].x = -3000; //移除屏幕之外
+        }
+        this.carouselHotAd0Index++;
+        this.carouselHotAd0Index = this.carouselHotAd0Index % this.hotAd0NodeArr.length;
+    },
+
+    /********************************爆款广告2************************************/
+    showHotAd1() {
+        var adContent = mg.hotAd1Node.getChildByName("adContent");
+        for (var i = 0; i < mg.gameAds.length; i++) {
+            if (mg.gameAds[i].location_flg == "B2") {
+                this.hotAd1Location = mg.gameAds[i].location_id;
+                mg.loginSDK.getAdDes(mg.gameAds[i].url, (data) => {
+                    this.hotAd1DataArr = data.data.result;
+                    console.log("log----------------爆款游戏1------", this.hotAd1DataArr);
+                    adContent.removeAllChildren();
+                    for (var i = 0; i < this.hotAd1DataArr.length; i++) {
+                        var ad = cc.instantiate(this.hotAd);
+                        ad.parent = adContent;
+                        console.log("log-----------------initHotAd1----------");
+                        ad.x = i == 0 ? 0 : -3000;
+                        let adSprite = ad.getChildByName("adSprite");
+                        let spComponent = adSprite.getComponent(cc.Sprite);
+                        mg.loginSDK.loadImg(spComponent, this.hotAd1DataArr[i].ad_img);
+                        let adData = { ad_id: this.hotAd1DataArr[i].ad_id, appid: this.hotAd1DataArr[i].ad_appid, path: this.hotAd1DataArr[i].ad_path, ad_qrimg: this.hotAd1DataArr[i].ad_qrimg }
+                        ad.on(cc.Node.EventType.TOUCH_START, () => {
+                            mg.loginSDK.reportClickInfo(adData.ad_id, this.hotAd1Location);
+                            mg.loginSDK.gotoOther(adData);
+                        });
+                        this.hotAd1NodeArr.push(ad);
+                    }
+                    mg.hotAd1Node.stopAllActions();
+                    this.scheduleOnce(() => {
+                        mg.hotAd1Node.runAction(cc.repeatForever(
+                            cc.sequence(
+                                cc.delayTime(7),
+                                cc.callFunc(() => {
+                                    this.doCarouselHotAd1();
+                                })
+                            )
+                        ))
+                    }, 2)
+                });
+            }
+        }
+    },
+
+    doCarouselHotAd1() {
+        if (this.hotAd1NodeArr.length <= 1) { //广告位推荐位大于1个，才有轮播功能
+            return
+        }
+        this.hotAd1NodeArr[this.carouselHotAd1Index].x = 0;
+        for (let i = 0; i < this.hotAd1NodeArr.length; i++) {
+            if (i == this.carouselHotAd1Index) {
+                continue;
+            }
+            this.hotAd1NodeArr[i].x = -3000; //移除屏幕之外
+        }
+        this.carouselHotAd1Index++;
+        this.carouselHotAd1Index = this.carouselHotAd1Index % this.hotAd1NodeArr.length;
+    },
+    /********************************死亡推荐广告************************************/
+    showDeadAD() {
+        let deadAdContent = mg.deadAdsNode.getChildByName("adContent");
+        for (let i = 0; i < mg.gameAds.length; i++) {
+            if (mg.gameAds[i].location_flg == "S") {
+                this.deadAdLocation = mg.gameAds[i].location_id;
+                mg.loginSDK.getAdDes(mg.gameAds[i].url, (data) => {
+                    this.deadAdDataArr = data.data.result;
+                    console.log("log----------------游戏死亡------", this.deadAdDataArr);
+                    deadAdContent.removeAllChildren();
+                    for (let i = 0; i < this.deadAdDataArr.length; i++) {
+                        if (i >= 6) { return }
+                        let gameOverAd = cc.instantiate(this.deadAd)
+                        gameOverAd.parent = deadAdContent;
+                        console.log("log----------------this.deadAdPosArr=:", this.deadAdPosArr)
+                        gameOverAd.x = this.deadAdPosArr[i].x;
+                        gameOverAd.y = this.deadAdPosArr[i].y;
+
+                        let adData = { ad_id: this.deadAdDataArr[i].ad_id, appid: this.deadAdDataArr[i].ad_appid, path: this.deadAdDataArr[i].ad_path, ad_qrimg: this.deadAdDataArr[i].ad_qrimg }
+
+                        gameOverAd.getComponent("gameOverAd").setAdSprite(this.deadAdDataArr[i].ad_img);
+                        gameOverAd.getComponent("gameOverAd").setAdName(this.deadAdDataArr[i].ad_name);
+                        gameOverAd.getComponent("gameOverAd").setAdDes(this.deadAdDataArr[i].ad_count + "人在玩");
+                        gameOverAd.on(cc.Node.EventType.TOUCH_START, () => {
+                            mg.loginSDK.reportClickInfo(adData.ad_id, this.deadAdLocation);
+                            this.refreshDeadAd(adData.appid);
+                            mg.loginSDK.gotoOther(adData);
+                        });
+
+                    }
+                })
+            }
+        }
+    },
+
+    refreshDeadAd(appid) {
+        let deadAdContent = mg.deadAdsNode.getChildByName("adContent");
+        if (this.deadAdDataArr.length <= 6) {
+            return;
+        }
+        deadAdContent.removeAllChildren();
+        for (let i = 0; i < this.deadAdDataArr.length; i++) {
+            if (appid == this.deadAdDataArr[i].ad_appid) {
+                this.deadAdDataArr.splice(i, 1);
+            }
+        }
+        for (let i = 0; i < this.deadAdDataArr.length; i++) {
+
+            //根据远程图片更换精灵帧
+            if (i >= 6) { return };
+
+            let gameOverAd = cc.instantiate(this.deadAd)
+            gameOverAd.parent = deadAdContent;
+            gameOverAd.x = this.deadAdPosArr[i].x;
+            gameOverAd.y = this.deadAdPosArr[i].y;
+
+            let adData = { ad_id: this.deadAdDataArr[i].ad_id, appid: this.deadAdDataArr[i].ad_appid, path: this.deadAdDataArr[i].ad_path, ad_qrimg: this.deadAdDataArr[i].ad_qrimg }
+
+            gameOverAd.getComponent("gameOverAd").setAdSprite(this.deadAdDataArr[i].ad_img);
+            gameOverAd.getComponent("gameOverAd").setAdName(this.deadAdDataArr[i].ad_name);
+            gameOverAd.getComponent("gameOverAd").setAdDes(this.deadAdDataArr[i].ad_count + "人在玩");
+            gameOverAd.on(cc.Node.EventType.TOUCH_START, () => {
+                mg.loginSDK.reportClickInfo(adData.ad_id, this.deadAdLocation);
+                this.refreshDeadAd(adData.appid);
+                mg.loginSDK.gotoOther(adData);
+            });
+        }
     }
-})
+});

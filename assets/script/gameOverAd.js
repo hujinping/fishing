@@ -4,7 +4,6 @@ cc.Class({
         adSprite: cc.Sprite,
         adDes: cc.Label,
         adName: cc.Label,
-        desSpriteFrames: [cc.SpriteFrame]
     },
 
 
@@ -23,6 +22,5 @@ cc.Class({
 
     setAdDes(des) {
         this.adDes.string = des;
-    }
-
+    },
 })

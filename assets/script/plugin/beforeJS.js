@@ -26,7 +26,7 @@
             scene_id: "",
             SDKVersion: "",
             location: ""
-        }, mg.switch = null, mg.version = "1.0.13", mg.isShareOpenData = {
+        }, mg.switch = null, mg.notShowAd = true, mg.version = "1.0.13", mg.isShareOpenData = {
             version: mg.version,
             isShareOpen: 0,
             redPacketOpen: 1,
